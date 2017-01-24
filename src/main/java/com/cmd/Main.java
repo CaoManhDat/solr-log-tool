@@ -11,52 +11,54 @@ import java.util.regex.Pattern;
 public class Main {
     private static Pattern PATTERN = Pattern.compile("([0-9-: .]+)\\s+([A-Z]+)\\s+\\(([A-Za-z0-9-:_ /]+)\\)\\s+\\[([A-Za-z0-9-:_ /]+)\\](.*)");
     public static void main(String[] args) throws IOException {
-        args = new String[2];
-        args[0] = "/Users/caomanhdat/Downloads/jepsen-solr.2016.12.29-15.38.20/solrcloud_5zk_5x3_create-set-client_partition-halves/n3-solr.log";
-        args[1] = "/Users/caomanhdat/Downloads/jepsen-solr.2016.12.29-15.38.20/solrcloud_5zk_5x3_create-set-client_partition-halves/tmp";
-        File input = new File(args[0]);
-        Map<String, List<Data>> threadNameToData = new HashMap<>();
-        Map<String, List<Data>> replicaToData = new HashMap<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(input))) {
-            String line;
-            Data lastData = null;
-            while ( (line = reader.readLine()) != null) {
-                String[] parts = separate(line);
-                if (parts == null && lastData != null) {
-                    if (line.startsWith("2016-")) {
-                        System.out.println(line);
-                    }
-                    lastData.append(line);
-                } else {
-                    lastData = new Data(line,parts);
-                    if (!threadNameToData.containsKey(lastData.threadName)) {
-                        threadNameToData.put(lastData.threadName, new ArrayList<Data>());
-                    }
-                    threadNameToData.get(lastData.threadName).add(lastData);
+        for (int index = 1; index <= 5; index++) {
+            args = new String[2];
+            args[0] = "/home/caomanhdat/test-results/jepsen-solr.2017.01.02-11.58.37/solrcloud_5zk_5x3_create-set-client_bridge/n"+index+"-solr.log";
+            args[1] = "/home/caomanhdat/test-results/jepsen-solr.2017.01.02-11.58.37/solrcloud_5zk_5x3_create-set-client_bridge/tmp";
+            File input = new File(args[0]);
+            Map<String, List<Data>> threadNameToData = new HashMap<>();
+            Map<String, List<Data>> replicaToData = new HashMap<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(input))) {
+                String line;
+                Data lastData = null;
+                while ( (line = reader.readLine()) != null) {
+                    String[] parts = separate(line);
+                    if (parts == null && lastData != null) {
+                        if (line.startsWith("2016-")) {
+                            System.out.println(line);
+                        }
+                        lastData.append(line);
+                    } else {
+                        lastData = new Data(line,parts);
+                        if (!threadNameToData.containsKey(lastData.threadName)) {
+                            threadNameToData.put(lastData.threadName, new ArrayList<Data>());
+                        }
+                        threadNameToData.get(lastData.threadName).add(lastData);
 
-                    if (!replicaToData.containsKey(lastData.xreplica)) {
-                        replicaToData.put(lastData.xreplica, new ArrayList<Data>());
+                        if (!replicaToData.containsKey(lastData.xreplica)) {
+                            replicaToData.put(lastData.xreplica, new ArrayList<Data>());
+                        }
+                        replicaToData.get(lastData.xreplica).add(lastData);
                     }
-                    replicaToData.get(lastData.xreplica).add(lastData);
                 }
             }
-        }
 
-        File outFolder = new File(args[1]);
-        outFolder.mkdirs();
-        for (Map.Entry<String, List<Data>> entry : replicaToData.entrySet()) {
-            String fileName = entry.getKey().replace(":","_");
-            if (entry.getKey().trim().length() == 0) {
-                fileName = input.getName()+"startup";
-            }
-            File file = new File(outFolder.getAbsolutePath()+"/"+fileName);
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            for (Data data : entry.getValue()) {
-                writer.write(data.all.toString());
-                writer.write("\n");
-            }
-            writer.close();
+            File outFolder = new File(args[1]);
+            outFolder.mkdirs();
+            for (Map.Entry<String, List<Data>> entry : replicaToData.entrySet()) {
+                String fileName = input.getName()+"-"+entry.getKey().replace(":","_");
+                if (entry.getKey().trim().length() == 0) {
+                    fileName = input.getName()+"-startup";
+                }
+                File file = new File(outFolder.getAbsolutePath()+"/"+fileName);
+                BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+                for (Data data : entry.getValue()) {
+                    writer.write(data.all.toString());
+                    writer.write("\n");
+                }
+                writer.close();
 
+            }
         }
     }
 
