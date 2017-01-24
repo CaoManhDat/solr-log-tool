@@ -12,8 +12,8 @@ public class Main {
     private static Pattern PATTERN = Pattern.compile("([0-9-: .]+)\\s+([A-Z]+)\\s+\\(([A-Za-z0-9-:_ /]+)\\)\\s+\\[([A-Za-z0-9-:_ /]+)\\](.*)");
     public static void main(String[] args) throws IOException {
         args = new String[2];
-        args[0] = "/Users/caomanhdat/Downloads/jepsen-solr.2016.12.29-15.38.20/solrcloud_5zk_5x3_create-set-client_partition-halves/n3-solr.log";
-        args[1] = "/Users/caomanhdat/Downloads/jepsen-solr.2016.12.29-15.38.20/solrcloud_5zk_5x3_create-set-client_partition-halves/tmp";
+        args[0] = "/Users/caomanhdat/tmp/tmp.txt";
+        args[1] = "/Users/caomanhdat/tmp";
         File input = new File(args[0]);
         Map<String, List<Data>> threadNameToData = new HashMap<>();
         Map<String, List<Data>> replicaToData = new HashMap<>();
